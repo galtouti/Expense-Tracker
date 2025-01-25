@@ -1,10 +1,9 @@
 const request = require('supertest');
-const { app, server } = require('./setup');
+const { app } = require('./setup');
 
 describe('GET /api/about', () => {
   it('should return information about the team', async () => {
-    const port = server.address().port; // Use the dynamic port
-    const response = await request(`http://localhost:${port}`).get('/api/about');
+    const response = await request(app).get('/api/about');
     expect(response.statusCode).toBe(200);
     expect(Array.isArray(response.body)).toBe(true);
     expect(response.body.length).toBeGreaterThan(0);
