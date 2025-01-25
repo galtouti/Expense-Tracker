@@ -5,7 +5,7 @@ const router = express.Router();
 router.get('/about', (req, res) => {
   res.json([
     { first_name: 'Gal', last_name: 'Touti' },
-    { first_name: 'Teammate', last_name: 'Name' },
+    { first_name: 'Sahar', last_name: 'Abitbol' },
   ]);
 });
 
