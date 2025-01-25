@@ -15,7 +15,7 @@ app.use('/api', require('./routes/about'));
 
 // Connect to MongoDB only if not in test mode
 if (process.env.NODE_ENV !== 'test') {
-  mongoose.connect(process.env.MONGO_URI)
+  mongoose.connect(process.env.MONGO_URI, { dbName: 'expense-tracker' })
     .then(() => console.log('Connected to MongoDB'))
     .catch(err => console.error('MongoDB connection error:', err));
 
