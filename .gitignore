@@ -10,7 +10,6 @@ logs/
 log-*.log
 
 # Environment
-.env
 .env.local
 .env.*.local
 
