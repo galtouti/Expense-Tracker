@@ -7,7 +7,7 @@ beforeAll(async () => {
   try {
     // Connect to MongoDB and wait for it to be ready
     await mongoose.connect(process.env.MONGO_URI, { 
-      dbName: 'test-db'
+      dbName: 'expense-tracker-test'
     });
 
     // Wait for connection to be fully established
@@ -30,7 +30,7 @@ beforeAll(async () => {
     // Start server
     return new Promise((resolve) => {
       server = app.listen(0, () => {
-        console.log('Test server running');
+        console.log('Test server running on expense-tracker-test database');
         resolve();
       });
     });

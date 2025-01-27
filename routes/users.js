@@ -3,10 +3,17 @@ const router = express.Router();
 const User = require('../models/user');
 const Cost = require('../models/cost');
 
-// Get user details and total cost
+/**
+ * @route GET /api/users/:id
+ * @description Get user details and their total costs
+ * @param {string} req.params.id - User ID
+ * @returns {Object} User details including first_name, last_name, id and total costs
+ * @throws {404} If user not found
+ * @throws {500} If server error occurs
+ */
 router.get('/users/:id', async (req, res) => {
   try {
-    const user = await User.findOne({ id: req.params.id }); // Adjusted to `findOne`
+    const user = await User.findOne({ id: req.params.id });
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
