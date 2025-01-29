@@ -2,15 +2,20 @@ const express = require('express');
 const router = express.Router();
 
 /**
+ * Get development team information
  * @route GET /api/about
- * @description Get development team members information
- * @returns {Object[]} Array of team members with first_name and last_name only
+ * @returns {Object[]} 200 - Array of team members
  */
 router.get('/about', (req, res) => {
-  res.json([
-    { first_name: 'Gal', last_name: 'Touti' },
-    { first_name: 'Teammate', last_name: 'Name' }
-  ]);
+  const teamMembers = [
+    { 
+      first_name: 'Gal', 
+      last_name: 'Touti' 
+    }
+    // Add other team members here in the same format
+  ];
+  
+  return res.status(200).json(teamMembers);
 });
 
 module.exports = router;

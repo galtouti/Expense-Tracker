@@ -3,60 +3,68 @@ const router = express.Router();
 const Cost = require('../models/cost');
 
 /**
+ * Get monthly report of costs
  * @route GET /api/report
- * @description Get monthly report of costs grouped by category
- * @param {Object} req.query
- * @param {string} req.query.id - User ID
- * @param {string} req.query.year - Year for the report
- * @param {string} req.query.month - Month for the report (1-12)
- * @returns {Object[]} Array of costs grouped by category with totals
- * @throws {400} If required query parameters are missing
- * @throws {500} If server error occurs
+ * @param {string} id.query.required - User ID
+ * @param {string} year.query.required - Report year
+ * @param {string} month.query.required - Report month (1-12)
+ * @returns {Object} 200 - Monthly report with costs grouped by category
+ * @returns {Error} 400 - Missing parameters
+ * @returns {Error} 500 - Server error
  */
 router.get('/report', async (req, res) => {
   const { id, year, month } = req.query;
 
   if (!id || !year || !month) {
-    return res.status(400).json({ error: 'Missing required parameters' });
+    return res.status(400).json({ 
+      error: 'Missing required parameters: id, year, and month are mandatory' 
+    });
   }
 
   try {
-    const startDate = new Date(`${year}-${month}-01`);
-    const endDate = new Date(`${year}-${parseInt(month) + 1}-01`);
+    // Create date range for the specified month
+    const startDate = new Date(Date.UTC(year, month - 1, 1));
+    const endDate = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999));
 
+    // Get costs grouped by category with original field names
     const costs = await Cost.aggregate([
       {
         $match: {
           userid: id,
-          date: { $gte: startDate, $lt: endDate }
+          date: { 
+            $gte: startDate, 
+            $lte: endDate 
+          }
         }
       },
       {
         $group: {
           _id: '$category',
-          costs: { 
+          costs: {
             $push: {
               description: '$description',
+              category: '$category',
+              userid: '$userid',
               sum: '$sum',
               date: '$date'
             }
-          },
-          total: { $sum: '$sum' }
+          }
         }
       },
       {
         $project: {
           category: '$_id',
           costs: 1,
-          total: 1,
           _id: 0
         }
       }
     ]);
 
-    res.status(200).json(costs);
+    return res.status(200).json(costs);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return res.status(500).json({ 
+      error: 'Internal server error' 
+    });
   }
 });
 

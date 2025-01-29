@@ -3,14 +3,26 @@ const app = require('../app');
 
 let server;
 
+/**
+ * Clear all test data from the database
+ */
+async function clearDatabase() {
+  const collections = ['costs', 'users'];
+  for (const collection of collections) {
+    if (mongoose.connection.collections[collection]) {
+      await mongoose.connection.collections[collection].deleteMany({});
+    }
+  }
+}
+
 beforeAll(async () => {
   try {
-    // Connect to MongoDB and wait for it to be ready
+    // Connect to MongoDB test database
     await mongoose.connect(process.env.MONGO_URI, { 
       dbName: 'expense-tracker-test'
     });
 
-    // Wait for connection to be fully established
+    // Wait for connection
     await new Promise((resolve) => {
       if (mongoose.connection.readyState === 1) {
         resolve();
@@ -19,15 +31,10 @@ beforeAll(async () => {
       }
     });
 
-    // Clear all collections at the start of tests
-    if (mongoose.connection.db) {
-      const collections = await mongoose.connection.db.collections();
-      for (const collection of collections) {
-        await collection.deleteMany({});
-      }
-    }
+    // Clear test database
+    await clearDatabase();
 
-    // Start server
+    // Start test server
     return new Promise((resolve) => {
       server = app.listen(0, () => {
         console.log('Test server running on expense-tracker-test database');
@@ -42,12 +49,13 @@ beforeAll(async () => {
 
 afterAll(async () => {
   try {
+    // Clear test database
+    await clearDatabase();
+    
     // Close MongoDB connection
-    if (mongoose.connection) {
-      await mongoose.connection.close();
-    }
+    await mongoose.connection.close();
 
-    // Close server if it exists
+    // Close server
     if (server) {
       await new Promise((resolve) => server.close(resolve));
     }
