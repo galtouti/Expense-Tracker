@@ -4,7 +4,7 @@ const User = require('../models/user');
 const Cost = require('../models/cost');
 
 // Add new user
-router.post('/users', async (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const { id, first_name, last_name, birthday, marital_status } = req.body;
     
@@ -45,7 +45,7 @@ router.post('/users', async (req, res) => {
 });
 
 // Get user details and total cost
-router.get('/users/:id', async (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
     const user = await User.findOne({ id: req.params.id });
     if (!user) {

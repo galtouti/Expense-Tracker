@@ -1,21 +1,51 @@
 const express = require('express');
-const User = require('../models/user');
 const router = express.Router();
 const Cost = require('../models/cost');
 
-// הוספת הוצאה חדשה
+// Add new cost item
 router.post('/add', async (req, res) => {
   try {
     const { description, category, userid, sum, date } = req.body;
-    const newCost = new Cost({ description, category, userid, sum, date });
+
+    // Validate required fields
+    if (!description || !category || !userid || sum === undefined) {
+      return res.status(400).json({ 
+        error: 'Missing required fields. Please provide description, category, userid, and sum.' 
+      });
+    }
+
+    // Validate sum is a positive number
+    if (typeof sum !== 'number' || sum <= 0) {
+      return res.status(400).json({ 
+        error: 'Sum must be a positive number.' 
+      });
+    }
+
+    // Create new cost item with today's date if no date provided
+    const newCost = new Cost({ 
+      description, 
+      category, 
+      userid, 
+      sum,
+      date: date || new Date()  // If date is not provided, use today's date
+    });
+
     await newCost.save();
     res.status(201).json(newCost);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    // Check if this is a validation error
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ 
+        error: error.message 
+      });
+    }
+    res.status(500).json({ 
+      error: 'Failed to add cost item: ' + error.message 
+    });
   }
 });
 
-// בקשת GET לקבלת כל ההוצאות
+// Get all costs
 router.get('/', async (req, res) => {
   try {
     const costs = await Cost.find();
@@ -23,26 +53,6 @@ router.get('/', async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
-
-// בקשת POST ליצירת משתמש חדש
-router.post('/users', async (req, res) => {
-    const { id, first_name, last_name, birthday, marital_status } = req.body;
-
-    const newUser = new User({
-        id,
-        first_name,
-        last_name,
-        birthday,
-        marital_status,
-    });
-
-    try {
-        const savedUser = await newUser.save();
-        res.status(201).json(savedUser);
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
 });
 
 module.exports = router;
