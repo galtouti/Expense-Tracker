@@ -8,46 +8,78 @@ router.post('/add', async (req, res) => {
   try {
     const { description, category, userid, sum, date } = req.body;
 
-    // Validate required fields
-    if (!description || !category || !userid || sum === undefined) {
+    // Validate all required fields are present
+    if (!description) {
+      return res.status(400).json({ error: 'Description is required' });
+    }
+    if (!category) {
+      return res.status(400).json({ error: 'Category is required' });
+    }
+    if (!userid) {
+      return res.status(400).json({ error: 'User ID is required' });
+    }
+    
+    // Enhanced sum validation
+    if (sum === undefined || sum === null || sum === '') {
+      return res.status(400).json({ error: 'Sum is required and cannot be empty' });
+    }
+    
+    // Validate sum is a number and positive
+    const numericSum = Number(sum);
+    if (isNaN(numericSum)) {
+      return res.status(400).json({ error: 'Sum must be a valid number' });
+    }
+    if (numericSum <= 0) {
+      return res.status(400).json({ error: 'Sum must be a positive number' });
+    }
+
+    // Validate description
+    if (description.trim().length === 0) {
+      return res.status(400).json({ error: 'Description cannot be empty' });
+    }
+
+    // Validate category is one of the allowed values
+    const ALLOWED_CATEGORIES = ['food', 'health', 'housing', 'sport', 'education'];
+    if (!ALLOWED_CATEGORIES.includes(category)) {
       return res.status(400).json({ 
-        error: 'Missing required fields. Please provide description, category, userid, and sum.' 
+        error: 'Invalid category. Category must be one of: food, health, housing, sport, education' 
       });
     }
 
-    // Validate sum is a positive number
-    if (typeof sum !== 'number' || sum <= 0) {
-      return res.status(400).json({ 
-        error: 'Sum must be a positive number.' 
-      });
+    // Validate date if provided
+    if (date) {
+      const dateObj = new Date(date);
+      if (isNaN(dateObj.getTime())) {
+        return res.status(400).json({ error: 'Invalid date format' });
+      }
     }
 
     // Check if user exists
     const userExists = await User.findOne({ id: userid });
     if (!userExists) {
-      return res.status(404).json({
-        error: 'User does not exist in the system'
-      });
+      return res.status(404).json({ error: 'User does not exist in the system' });
     }
 
-    // Create new cost item with today's date if no date provided
+    // Create new cost item
     const newCost = new Cost({ 
       description, 
       category, 
       userid, 
       sum,
-      date: date || new Date()  // If date is not provided, use today's date
+      date: date || new Date()
     });
 
     await newCost.save();
     res.status(201).json(newCost);
   } catch (error) {
-    // Check if this is a validation error
+    // Handle mongoose validation errors
     if (error.name === 'ValidationError') {
-      return res.status(400).json({ 
-        error: error.message 
-      });
+      const errorMessage = Object.values(error.errors)
+        .map(err => err.message)
+        .join(', ');
+      return res.status(400).json({ error: errorMessage });
     }
+    
     res.status(500).json({ 
       error: 'Failed to add cost item: ' + error.message 
     });
