@@ -22,6 +22,11 @@ router.get('/', async (req, res) => {
       }
     }).sort('date');
 
+    // Check if there are any costs for the selected month
+    if (costs.length === 0) {
+      return res.status(200).json({ message: 'No data available for the selected month' });
+    }
+    
     // Get category summaries
     const categorySummaries = await Cost.aggregate([
       {
