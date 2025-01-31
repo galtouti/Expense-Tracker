@@ -8,10 +8,10 @@ const app = express();
 app.use(express.json());
 
 // Load routes
-app.use('/api', require('./routes/costs'));
-app.use('/api', require('./routes/report'));
-app.use('/api', require('./routes/users'));
-app.use('/api', require('./routes/about'));
+app.use("/api/costs", require("./routes/costs"));
+app.use("/api/report", require("./routes/report"));
+app.use("/api/users", require("./routes/users"));
+app.use("/api/about", require("./routes/about"));
 
 // Connect to MongoDB only if not in test mode
 if (process.env.NODE_ENV !== 'test') {

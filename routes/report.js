@@ -3,7 +3,7 @@ const router = express.Router();
 const Cost = require('../models/cost');
 
 // Monthly report endpoint with grouping by categories
-router.get('/report', async (req, res) => {
+router.get('/', async (req, res) => {
   const { id, year, month } = req.query;
 
   if (!id || !year || !month) {

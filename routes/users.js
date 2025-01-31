@@ -10,24 +10,24 @@ router.post('/', async (req, res) => {
     
     // Validate required fields
     if (!id || !first_name || !last_name || !birthday || !marital_status) {
-      return res.status(400).json({ error: 'כל השדות הם חובה' });
+      return res.status(400).json({ error: 'All fields are required' });
     }
 
     // Validate ID format (assuming ID should be numeric and at least 5 digits)
     if (!/^\d{5,}$/.test(id)) {
-      return res.status(400).json({ error: 'מזהה לא תקין - צריך להיות מספר עם לפחות 5 ספרות' });
+      return res.status(400).json({ error: 'Invalid ID - must be a number with at least 5 digits' });
     }
 
     // Validate birthday
     const birthdayDate = new Date(birthday);
     if (isNaN(birthdayDate.getTime())) {
-      return res.status(400).json({ error: 'תאריך לידה לא תקין' });
+      return res.status(400).json({ error: 'Invalid birth date' });
     }
 
     // Check if user already exists
     const existingUser = await User.findOne({ id });
     if (existingUser) {
-      return res.status(409).json({ error: 'משתמש עם מזהה זה כבר קיים' });
+      return res.status(409).json({ error: 'User with this ID already exists' });
     }
 
     const newUser = new User({

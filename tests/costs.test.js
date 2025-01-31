@@ -1,11 +1,11 @@
 const request = require('supertest');
 const { app } = require('./setup');
 
-describe('POST /api/add', () => {
+describe('POST /api/costs/add', () => {
   it('should add a new cost item with all valid fields', async () => {
     const testDate = new Date('2024-03-15');
     const response = await request(app)
-      .post('/api/add')
+      .post('/api/costs/add')
       .send({
         description: 'Test expense',
         category: 'food',
@@ -25,7 +25,7 @@ describe('POST /api/add', () => {
 
   it('should add a cost item without date and use current date', async () => {
     const response = await request(app)
-      .post('/api/add')
+      .post('/api/costs/add')
       .send({
         description: 'Test expense',
         category: 'food',
@@ -40,7 +40,7 @@ describe('POST /api/add', () => {
 
   it('should fail when sum is negative', async () => {
     const response = await request(app)
-      .post('/api/add')
+      .post('/api/costs/add')
       .send({
         description: 'Test expense',
         category: 'food',
@@ -55,7 +55,7 @@ describe('POST /api/add', () => {
 
   it('should fail when sum is zero', async () => {
     const response = await request(app)
-      .post('/api/add')
+      .post('/api/costs/add')
       .send({
         description: 'Test expense',
         category: 'food',
@@ -70,7 +70,7 @@ describe('POST /api/add', () => {
 
   it('should fail when required fields are missing', async () => {
     const response = await request(app)
-      .post('/api/add')
+      .post('/api/costs/    add')
       .send({
         description: 'Test expense'
         // missing category, userid, and sum
@@ -83,7 +83,7 @@ describe('POST /api/add', () => {
 
   it('should fail when description is empty', async () => {
     const response = await request(app)
-      .post('/api/add')
+      .post('/api/costs/add')
       .send({
         description: '',
         category: 'food',
@@ -97,7 +97,7 @@ describe('POST /api/add', () => {
 
   it('should fail when category is empty', async () => {
     const response = await request(app)
-      .post('/api/add')
+      .post('/api/costs/add')
       .send({
         description: 'Test expense',
         category: '',
@@ -111,7 +111,7 @@ describe('POST /api/add', () => {
 
   it('should trim whitespace from text fields', async () => {
     const response = await request(app)
-      .post('/api/add')
+      .post('/api/costs/add')
       .send({
         description: '  Test expense  ',
         category: '  food  ',
@@ -127,7 +127,7 @@ describe('POST /api/add', () => {
 
   it('should fail when date is invalid', async () => {
     const response = await request(app)
-      .post('/api/add')
+      .post('/api/costs/add')
       .send({
         description: 'Test expense',
         category: 'food',
