@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema({
   },
   birthday: { 
     type: Date, 
-    required: [true, 'Birthday is required'],
+    required: [true, 'Birthday date is required'],
     validate: {
       validator: function(value) {
         return value instanceof Date && !isNaN(value);
@@ -33,7 +33,10 @@ const userSchema = new mongoose.Schema({
     type: String, 
     required: [true, 'Marital status is required'],
     trim: true,
-    minlength: [1, 'Marital status cannot be empty']
+    enum: {
+      values: ['single', 'married', 'divorced', 'widowed'],
+      message: 'Marital status must be one of the following: single, married, divorced, widowed'
+    }
   }
 });
 

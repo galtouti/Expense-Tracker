@@ -8,9 +8,21 @@ router.post('/', async (req, res) => {
   try {
     const { id, first_name, last_name, birthday, marital_status } = req.body;
     
-    // Validate required fields
-    if (!id || !first_name || !last_name || !birthday || !marital_status) {
-      return res.status(400).json({ error: 'All fields are required' });
+    // Validate each field individually
+    if (!id) {
+      return res.status(400).json({ error: 'ID is required' });
+    }
+    if (!first_name) {
+      return res.status(400).json({ error: 'First name is required' });
+    }
+    if (!last_name) {
+      return res.status(400).json({ error: 'Last name is required' });
+    }
+    if (!birthday) {
+      return res.status(400).json({ error: 'Birthday date is required' });
+    }
+    if (!marital_status) {
+      return res.status(400).json({ error: 'Marital status is required' });
     }
 
     // Validate ID format (assuming ID should be numeric and at least 5 digits)
