@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Cost = require('../models/cost');
+const User = require('../models/user');
 
 // Add new cost item
 router.post('/add', async (req, res) => {
@@ -18,6 +19,14 @@ router.post('/add', async (req, res) => {
     if (typeof sum !== 'number' || sum <= 0) {
       return res.status(400).json({ 
         error: 'Sum must be a positive number.' 
+      });
+    }
+
+    // Check if user exists
+    const userExists = await User.findOne({ id: userid });
+    if (!userExists) {
+      return res.status(404).json({
+        error: 'User does not exist in the system'
       });
     }
 
