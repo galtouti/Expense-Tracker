@@ -4,30 +4,42 @@ const User = require('../models/user');
 const Cost = require('../models/cost');
 
 // Add new user
-router.post('/users', async (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const { id, first_name, last_name, birthday, marital_status } = req.body;
     
-    // Validate required fields
-    if (!id || !first_name || !last_name || !birthday || !marital_status) {
-      return res.status(400).json({ error: 'כל השדות הם חובה' });
+    // Validate each field individually
+    if (!id) {
+      return res.status(400).json({ error: 'ID is required' });
+    }
+    if (!first_name) {
+      return res.status(400).json({ error: 'First name is required' });
+    }
+    if (!last_name) {
+      return res.status(400).json({ error: 'Last name is required' });
+    }
+    if (!birthday) {
+      return res.status(400).json({ error: 'Birthday date is required' });
+    }
+    if (!marital_status) {
+      return res.status(400).json({ error: 'Marital status is required' });
     }
 
     // Validate ID format (assuming ID should be numeric and at least 5 digits)
     if (!/^\d{5,}$/.test(id)) {
-      return res.status(400).json({ error: 'מזהה לא תקין - צריך להיות מספר עם לפחות 5 ספרות' });
+      return res.status(400).json({ error: 'Invalid ID - must be a number with at least 5 digits' });
     }
 
     // Validate birthday
     const birthdayDate = new Date(birthday);
     if (isNaN(birthdayDate.getTime())) {
-      return res.status(400).json({ error: 'תאריך לידה לא תקין' });
+      return res.status(400).json({ error: 'Invalid birth date' });
     }
 
     // Check if user already exists
     const existingUser = await User.findOne({ id });
     if (existingUser) {
-      return res.status(409).json({ error: 'משתמש עם מזהה זה כבר קיים' });
+      return res.status(409).json({ error: 'User with this ID already exists' });
     }
 
     const newUser = new User({
@@ -45,7 +57,7 @@ router.post('/users', async (req, res) => {
 });
 
 // Get user details and total cost
-router.get('/users/:id', async (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
     const user = await User.findOne({ id: req.params.id });
     if (!user) {
