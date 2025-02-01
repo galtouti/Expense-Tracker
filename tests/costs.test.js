@@ -1,12 +1,20 @@
-// costs.test.js
+/**
+ * @module tests/costs
+ * @description Test suite for expense-related API endpoints
+ */
+
 const request = require('supertest');
 const { app } = require('./setup');
 
 describe('Costs API', () => {
-  const testUserId = '54321'; // Create such a user for tests
+  /* Test user ID for expense association */
+  const testUserId = '54321';
   
+  /**
+   * Setup: Create a test user before running expense tests
+   * @function beforeAll
+   */
   beforeAll(async () => {
-    // First, create a user to associate expenses
     await request(app)
       .post('/api/users')
       .send({
@@ -18,7 +26,12 @@ describe('Costs API', () => {
       });
   });
 
+  /**
+   * Test suite for expense creation endpoint
+   * @group POST /api/add
+   */
   describe('POST /api/add', () => {
+    /* Test successful expense creation with valid data */
     it('should add a new cost with valid data', async () => {
       const response = await request(app)
         .post('/api/add')
@@ -35,6 +48,7 @@ describe('Costs API', () => {
       expect(response.body.sum).toBe(50);
     });
 
+    /* Test validation of negative expense amounts */
     it('should fail if sum is negative', async () => {
       const response = await request(app)
         .post('/api/add')
@@ -48,6 +62,7 @@ describe('Costs API', () => {
       expect(response.body.error).toMatch(/Sum must be a positive number/);
     });
 
+    /* Test handling of expenses for non-existent users */
     it('should fail if user does not exist', async () => {
       const response = await request(app)
         .post('/api/add')
@@ -62,13 +77,18 @@ describe('Costs API', () => {
     });
   });
 
+  /**
+   * Test suite for expense retrieval endpoint
+   * @group GET /api
+   */
   describe('GET /api', () => {
+    /* Test retrieval of all expenses */
     it('should get all costs', async () => {
       const response = await request(app).get('/api');
       expect(response.statusCode).toBe(200);
       expect(Array.isArray(response.body)).toBe(true);
 
-      // Ensure there is at least one expense added
+      /* Verify previously created test expense exists */
       const pizzaCost = response.body.find(cost => cost.description === 'Pizza');
       expect(pizzaCost).toBeDefined();
     });

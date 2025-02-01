@@ -1,41 +1,65 @@
-# Personal Expense Tracker
+# Expense Tracker API
 
-A simple and intuitive web service that allows users to track their expenses by adding costs, viewing monthly reports, and managing their user details.
+A robust RESTful API service for personal expense tracking, built with Node.js, Express, and MongoDB. This service provides comprehensive functionality for managing users, tracking expenses, and generating detailed financial reports.
 
-## Features
-- **Add Costs**: Easily log your daily expenses.
-- **Monthly Reports**: View a breakdown of your expenses by category and time period.
-- **User Management**: Retrieve and manage user details.
+## 🚀 Features
 
-## Project Structure
+- **User Management**
+  - Create and manage user profiles
+  - Validate user information (ID, name, birthday, marital status)
+  - Retrieve user details with total expenses
+
+- **Expense Tracking**
+  - Add and categorize expenses
+  - Support for multiple expense categories (food, health, housing, sport, education)
+  - Validate expense data (amount, description, date)
+
+- **Financial Reporting**
+  - Generate detailed monthly expense reports
+  - Group expenses by category
+  - Calculate totals and statistics
+  - Filter reports by user and time period
+
+## 🛠️ Technology Stack
+
+- **Runtime Environment**: Node.js
+- **Framework**: Express.js
+- **Database**: MongoDB with Mongoose ODM
+- **Testing**: Jest with Supertest
+- **Documentation**: JSDoc
+- **Code Quality**: ESLint (optional)
+
+## 📁 Project Structure
+
 ```plaintext
 expense-tracker/
-├── models/
-│   ├── cost.js         # Schema for costs
-│   └── user.js         # Schema for user details
-├── routes/
-│   ├── about.js        # About route
-│   ├── costs.js        # Routes for cost operations
-│   ├── report.js       # Routes for generating reports
-│   └── users.js        # Routes for user operations
-├── tests/
-│   ├── costs.test.js   # Tests for cost functionalities
-│   ├── report.test.js  # Tests for report functionalities
-│   └── users.test.js   # Tests for user functionalities
-├── .env                # Environment variables
-├── app.js              # Main application entry point
-├── package.json        # Project dependencies
-├── package-lock.json   # Dependency tree lockfile
-└── README.md           # Project documentation
+├── models/              # Database schemas and models
+│   ├── cost.js         # Expense schema definition
+│   └── user.js         # User schema definition
+├── routes/             # API route handlers
+│   ├── about.js        # Team information endpoints
+│   ├── costs.js        # Expense management endpoints
+│   ├── report.js       # Report generation endpoints
+│   └── users.js        # User management endpoints
+├── tests/              # Test suites
+│   ├── setup.js        # Test environment configuration
+│   ├── costs.test.js   # Expense endpoints tests
+│   ├── report.test.js  # Report endpoints tests
+│   └── users.test.js   # User endpoints tests
+├── app.js              # Application entry point
+└── package.json        # Project configuration
 ```
 
-## Tech Stack
-- **Backend**: Node.js, Express.js
-- **Frontend**: React (optional, for building a web UI)
-- **Database**: MongoDB
-- **Testing**: Jest, Supertest
+## 🚦 Getting Started
 
-## Installation
+### Prerequisites
+
+- Node.js (v14 or higher)
+- MongoDB (v4.4 or higher)
+- npm or yarn package manager
+
+### Installation
+
 1. Clone the repository:
    ```bash
    git clone https://github.com/your-username/expense-tracker.git
@@ -47,44 +71,85 @@ expense-tracker/
    npm install
    ```
 
-3. Set up environment variables:
-   Create a `.env` file in the root directory with the following:
-   ```plaintext
-   MONGO_URI=<your-mongodb-connection-string>
+3. Configure environment variables:
+   Create a `.env` file with:
+   ```env
+   MONGO_URI=mongodb://localhost:27017/expense-tracker
    PORT=3000
+   NODE_ENV=development
    ```
 
-4. Start the development server:
+4. Start the server:
    ```bash
    npm start
    ```
 
-5. Run tests:
-   ```bash
-   npm test
-   ```
+## 📡 API Endpoints
 
-## API Endpoints
-### Users
-- **GET /users**: Retrieve all users
-- **POST /users**: Create a new user
+### Users API
+- **POST /api/users**
+  - Create a new user
+  - Required fields: id, first_name, last_name, birthday, marital_status
+  - ID must be at least 5 digits
 
-### Costs
-- **GET /costs**: Retrieve all costs
-- **POST /costs**: Add a new cost
+- **GET /api/users/:id**
+  - Retrieve user details and total expenses
+  - Returns 404 if user not found
 
-### Reports
-- **GET /report?month=MM&year=YYYY**: Retrieve monthly expense reports
+### Expenses API
+- **POST /api/add**
+  - Add a new expense
+  - Required fields: description, category, userid, sum
+  - Optional: date (defaults to current date)
 
-### About
-- **GET /about**: Retrieve application details
+- **GET /api**
+  - Retrieve all expenses
+  - Returns array of expense objects
 
-## Contributing
-Contributions are welcome! Please open an issue or submit a pull request for any features or improvements.
+### Reports API
+- **GET /api/report**
+  - Generate monthly expense report
+  - Query parameters: id (user), year, month
+  - Returns categorized expenses with totals
 
-## License
-This project is licensed under the [MIT License](LICENSE).
+### About API
+- **GET /api/about**
+  - Retrieve team member information
+  - Returns developers' details
+
+## 🧪 Testing
+
+Run the test suite:
+```bash
+npm test
+```
+
+Run tests with coverage:
+```bash
+npm run test:coverage
+```
+
+## 📝 API Documentation
+
+Detailed API documentation with request/response examples is available in the [API_DOCS.md](API_DOCS.md) file.
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 👥 Team
+
+- Gal Touti
+- Sahar Abitbol
 
 ---
 
-Happy tracking! 🎉
+Made with ❤️ by the Expense Tracker Team

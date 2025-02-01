@@ -1,24 +1,37 @@
+/**
+ * @module models/user
+ * @description User model schema definition and validation
+ */
+
 const mongoose = require('mongoose');
 
+/**
+ * User Schema - Defines the structure for user documents
+ * @typedef {Object} UserSchema
+ */
 const userSchema = new mongoose.Schema({
+  /* User's unique identification number */
   id: { 
     type: String, 
     required: [true, 'ID is required'],
     trim: true,
     index: true
   },
+  /* User's first name */
   first_name: { 
     type: String, 
     required: [true, 'First name is required'],
     trim: true,
     minlength: [1, 'First name cannot be empty']
   },
+  /* User's last name */
   last_name: { 
     type: String, 
     required: [true, 'Last name is required'],
     trim: true,
     minlength: [1, 'Last name cannot be empty']
   },
+  /* User's date of birth with validation */
   birthday: { 
     type: Date, 
     required: [true, 'Birthday date is required'],
@@ -37,6 +50,7 @@ const userSchema = new mongoose.Schema({
       }
     ]
   },
+  /* User's marital status with predefined options */
   marital_status: { 
     type: String, 
     required: [true, 'Marital status is required'],
@@ -48,4 +62,8 @@ const userSchema = new mongoose.Schema({
   }
 });
 
+/**
+ * Exports the User model
+ * @type {mongoose.Model}
+ */
 module.exports = mongoose.model('User', userSchema);

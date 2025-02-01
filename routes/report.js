@@ -1,16 +1,28 @@
+/**
+ * @module routes/report
+ * @description Express router handling expense report generation
+ */
+
 const express = require('express');
 const router = express.Router();
 const Cost = require('../models/cost');
 const User = require('../models/user');
 
-// Get the allowed categories from the Cost model
+/* Define valid expense categories */
 const allowedCategories = ['food', 'health', 'housing', 'sport', 'education'];
 
-// Monthly report endpoint with grouping by categories
+/**
+ * GET /report
+ * @description Generates a monthly expense report grouped by categories
+ * @param {Object} req.query - Query parameters
+ * @param {string} req.query.id - User ID to generate report for
+ * @param {string} req.query.year - Year of the report (YYYY)
+ * @param {string} req.query.month - Month of the report (1-12)
+ */
 router.get('/', async (req, res) => {
   const { id, year, month } = req.query;
 
-  // Validate each required parameter individually
+  /* Validate required parameters */
   if (!id) {
     return res.status(400).json({ 
       error: 'Missing user ID',
@@ -33,7 +45,7 @@ router.get('/', async (req, res) => {
   }
 
   try {
-    // Check if user exists
+    /* Verify user exists */
     const user = await User.findOne({ id: id });
     if (!user) {
       return res.status(404).json({
@@ -42,7 +54,7 @@ router.get('/', async (req, res) => {
       });
     }
 
-    // Get all costs for the period
+    /* Retrieve expenses for the specified period */
     const costs = await Cost.find({
       userid: id,
       $expr: {
@@ -53,7 +65,7 @@ router.get('/', async (req, res) => {
       }
     }).sort('date');
     
-    // Initialize costsByCategory with all possible categories
+    /* Initialize data structure for all categories */
     const costsByCategory = {};
     allowedCategories.forEach(category => {
       costsByCategory[category] = {
@@ -63,7 +75,7 @@ router.get('/', async (req, res) => {
       };
     });
 
-    // Add the actual costs to their respective categories
+    /* Group expenses by category and calculate totals */
     costs.forEach(cost => {
       costsByCategory[cost.category].expenses.push({
         description: cost.description,
@@ -74,7 +86,7 @@ router.get('/', async (req, res) => {
       costsByCategory[cost.category].count += 1;
     });
 
-    // Calculate grand total and summary
+    /* Calculate summary statistics */
     const categoriesCount = Object.values(costsByCategory)
       .filter(category => category.totalSum > 0)
       .length;
@@ -83,7 +95,7 @@ router.get('/', async (req, res) => {
     const grandTotal = Object.values(costsByCategory)
       .reduce((acc, category) => acc + category.totalSum, 0);
 
-    // Prepare the response
+    /* Format response object */
     const response = {
       userId: id,
       month: parseInt(month),

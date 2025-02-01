@@ -1,16 +1,28 @@
+/**
+ * @module tests/setup
+ * @description Test environment setup and teardown configuration
+ */
+
 const mongoose = require('mongoose');
 const app = require('../app');
 
+/* Server instance for testing */
 let server;
 
+/**
+ * Global setup before running tests
+ * Connects to test database and starts test server
+ * @async
+ * @function beforeAll
+ */
 beforeAll(async () => {
   try {
-    // Connect to MongoDB and wait for it to be ready
+    /* Connect to MongoDB test database */
     await mongoose.connect(process.env.MONGO_URI, { 
       dbName: 'test-db'
     });
 
-    // Wait for connection to be fully established
+    /* Ensure database connection is established */
     await new Promise((resolve) => {
       if (mongoose.connection.readyState === 1) {
         resolve();
@@ -19,7 +31,7 @@ beforeAll(async () => {
       }
     });
 
-    // Clear all collections at the start of tests
+    /* Clean up existing test data */
     if (mongoose.connection.db) {
       const collections = await mongoose.connection.db.collections();
       for (const collection of collections) {
@@ -27,7 +39,7 @@ beforeAll(async () => {
       }
     }
 
-    // Start server
+    /* Initialize test server on random port */
     return new Promise((resolve) => {
       server = app.listen(0, () => {
         console.log('Test server running');
@@ -40,14 +52,20 @@ beforeAll(async () => {
   }
 });
 
+/**
+ * Global cleanup after all tests complete
+ * Closes database connection and test server
+ * @async
+ * @function afterAll
+ */
 afterAll(async () => {
   try {
-    // Close MongoDB connection
+    /* Close database connection */
     if (mongoose.connection) {
       await mongoose.connection.close();
     }
 
-    // Close server if it exists
+    /* Shutdown test server */
     if (server) {
       await new Promise((resolve) => server.close(resolve));
     }
@@ -57,4 +75,10 @@ afterAll(async () => {
   }
 });
 
+/**
+ * Export app and server instances for test files
+ * @exports {Object} 
+ * @property {Express} app - Express application instance
+ * @property {http.Server} server - HTTP server instance
+ */
 module.exports = { app, server };
