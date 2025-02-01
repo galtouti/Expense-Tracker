@@ -4,7 +4,7 @@ const Cost = require('../models/cost');
 const User = require('../models/user');
 
 // Get the allowed categories from the Cost model
-const ALLOWED_CATEGORIES = ['food', 'health', 'housing', 'sport', 'education'];
+const allowedCategories = ['food', 'health', 'housing', 'sport', 'education'];
 
 // Monthly report endpoint with grouping by categories
 router.get('/', async (req, res) => {
@@ -55,7 +55,7 @@ router.get('/', async (req, res) => {
     
     // Initialize costsByCategory with all possible categories
     const costsByCategory = {};
-    ALLOWED_CATEGORIES.forEach(category => {
+    allowedCategories.forEach(category => {
       costsByCategory[category] = {
         expenses: [],
         totalSum: 0,

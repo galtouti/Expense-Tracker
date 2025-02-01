@@ -39,8 +39,8 @@ router.post('/add', async (req, res) => {
     }
 
     // Validate category is one of the allowed values
-    const ALLOWED_CATEGORIES = ['food', 'health', 'housing', 'sport', 'education'];
-    if (!ALLOWED_CATEGORIES.includes(category)) {
+    const allowedCategories = ['food', 'health', 'housing', 'sport', 'education'];
+    if (!allowedCategories.includes(category)) {
       return res.status(400).json({ 
         error: 'Invalid category. Category must be one of: food, health, housing, sport, education' 
       });

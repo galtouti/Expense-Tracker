@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const ALLOWED_CATEGORIES = ['food', 'health', 'housing', 'sport', 'education'];
+const allowedCategories = ['food', 'health', 'housing', 'sport', 'education'];
 
 const costSchema = new mongoose.Schema({
   description: { 
@@ -14,7 +14,7 @@ const costSchema = new mongoose.Schema({
     required: [true, 'Category is required'],
     trim: true,
     enum: {
-      values: ALLOWED_CATEGORIES,
+      values: allowedCategories,
       message: 'Category must be one of: food, health, housing, sport, education'
     }
   },
