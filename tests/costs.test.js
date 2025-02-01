@@ -3,7 +3,7 @@ const request = require('supertest');
 const { app } = require('./setup');
 
 describe('Costs API', () => {
-  let testUserId = '54321'; // Create such a user for tests
+  const testUserId = '54321'; // Create such a user for tests
   
   beforeAll(async () => {
     // First, create a user to associate expenses

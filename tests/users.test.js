@@ -3,7 +3,7 @@ const request = require('supertest');
 const { app } = require('./setup');
 
 describe('Users API', () => {
-  let testUserId = '12345';  // Valid ID: at least 5 digits
+  const testUserId = '12345';  // Valid ID: at least 5 digits
   let createdUser;
 
   describe('POST /api/users', () => {

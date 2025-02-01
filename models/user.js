@@ -22,12 +22,20 @@ const userSchema = new mongoose.Schema({
   birthday: { 
     type: Date, 
     required: [true, 'Birthday date is required'],
-    validate: {
-      validator: function(value) {
-        return value instanceof Date && !isNaN(value);
+    validate: [
+      {
+        validator: function(value) {
+          return value instanceof Date && !isNaN(value);
+        },
+        message: 'Invalid date format'
       },
-      message: 'Invalid date format'
-    }
+      {
+        validator: function(value) {
+          return value <= new Date();
+        },
+        message: 'Birthday date cannot be in the future'
+      }
+    ]
   },
   marital_status: { 
     type: String, 

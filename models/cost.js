@@ -26,7 +26,8 @@ const costSchema = new mongoose.Schema({
   sum: { 
     type: Number, 
     required: [true, 'Sum is required'],
-    min: [0, 'Sum must be a positive number']
+    min: [0, 'Sum must be a positive number'],
+    max: [1000000000, 'Sum must be les then 1000000000']
   },
   date: { 
     type: Date, 

@@ -3,7 +3,7 @@ const request = require('supertest');
 const { app } = require('./setup');
 
 describe('Report API', () => {
-  let testUserId = '77777';
+  const testUserId = '77777';
 
   beforeAll(async () => {
     // Create a user for tests
