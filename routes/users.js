@@ -88,6 +88,12 @@ router.get('/:id', async (req, res) => {
       });
     }
 
+    // Calculate total expenses for the user
+    const totalExpenses = await Cost.aggregate([
+      { $match: { userid: req.params.id } },
+      { $group: { _id: null, total: { $sum: "$sum" } } }
+    ]);
+
     // Format birthday to YYYY-MM-DD
     const birthday = user.birthday.toISOString().split('T')[0];
 
@@ -96,7 +102,8 @@ router.get('/:id', async (req, res) => {
       first_name: user.first_name,
       last_name: user.last_name,
       birthday: birthday,
-      marital_status: user.marital_status
+      marital_status: user.marital_status,
+      total_expenses: totalExpenses.length > 0 ? totalExpenses[0].total : 0
     });
   } catch (err) {
     res.status(500).json({ 
