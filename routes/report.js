@@ -98,8 +98,7 @@ router.get('/', async (req, res) => {
       summary: {
         totalAmount: grandTotal,
         totalCategories: categoriesCount,
-        totalExpenses: totalExpensesCount,
-        averagePerCategory: (grandTotal / categoriesCount).toFixed(2)
+        totalExpenses: totalExpensesCount
       }
     };
 
