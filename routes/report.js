@@ -58,52 +58,48 @@ router.get('/', async (req, res) => {
       });
     }
     
-    // Get category summaries
-    const categorySummaries = await Cost.aggregate([
-      {
-        $match: {
-          userid: id,
-          $expr: {
-            $and: [
-              { $eq: [{ $year: "$date" }, parseInt(year)] },
-              { $eq: [{ $month: "$date" }, parseInt(month)] }
-            ]
-          }
-        }
-      },
-      {
-        $group: {
-          _id: "$category",
-          sum: { $sum: "$sum" }
-        }
-      },
-      {
-        $project: {
-          category: "$_id",
-          sum: 1,
-          _id: 0
-        }
+    // Group costs by category
+    const costsByCategory = {};
+    costs.forEach(cost => {
+      if (!costsByCategory[cost.category]) {
+        costsByCategory[cost.category] = {
+          expenses: [],
+          totalSum: 0,
+          count: 0
+        };
       }
-    ]);
+      costsByCategory[cost.category].expenses.push({
+        description: cost.description,
+        sum: cost.sum,
+        date: cost.date.toISOString().split('T')[0]
+      });
+      costsByCategory[cost.category].totalSum += cost.sum;
+      costsByCategory[cost.category].count += 1;
+    });
 
-    // Calculate total sum
-    const totalSum = categorySummaries.reduce((acc, curr) => acc + curr.sum, 0);
+    // Calculate grand total and summary
+    const categoriesCount = Object.keys(costsByCategory).length;
+    const totalExpensesCount = Object.values(costsByCategory)
+      .reduce((acc, category) => acc + category.count, 0);
+    const grandTotal = Object.values(costsByCategory)
+      .reduce((acc, category) => acc + category.totalSum, 0);
 
     // Prepare the response
     const response = {
-      status: 'success',
-      data: {
-        costs: costs.map(cost => ({
-          description: cost.description,
-          category: cost.category,
-          sum: cost.sum,
-          date: cost.date
-        })),
-        categorySummaries: categorySummaries,
-        summary: {
-          total: totalSum,
-          categories: categorySummaries.map(cat => cat.category)
-        }
+      userId: id,
+      month: parseInt(month),
+      year: parseInt(year),
+      categories: Object.entries(costsByCategory).map(([category, data]) => ({
+        category,
+        expenses: data.expenses,
+        categoryTotal: data.totalSum,
+        expensesCount: data.count
+      })),
+      summary: {
+        totalAmount: grandTotal,
+        totalCategories: categoriesCount,
+        totalExpenses: totalExpensesCount,
+        averagePerCategory: (grandTotal / categoriesCount).toFixed(2)
       }
     };
 
