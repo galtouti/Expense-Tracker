@@ -22,14 +22,28 @@ const userSchema = new mongoose.Schema({
     type: String, 
     required: [true, 'First name is required'],
     trim: true,
-    minlength: [1, 'First name cannot be empty']
+    minlength: [1, 'First name cannot be empty'],
+    maxlength: [100, 'First name cannot be longer than 30 characters'],
+    validate: {
+      validator: function(value) {
+        return /^[A-Za-zא-ת\s]+$/.test(value);
+      },
+      message: 'First name can only contain letters'
+    }
   },
   /* User's last name */
   last_name: { 
     type: String, 
     required: [true, 'Last name is required'],
     trim: true,
-    minlength: [1, 'Last name cannot be empty']
+    minlength: [1, 'Last name cannot be empty'],
+    maxlength: [100, 'Last name cannot be longer than 30 characters'],
+    validate: {
+      validator: function(value) {
+        return /^[A-Za-zא-ת\s]+$/.test(value);
+      },
+      message: 'Last name can only contain letters'
+    }
   },
   /* User's date of birth with validation */
   birthday: { 
