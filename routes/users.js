@@ -30,9 +30,20 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Invalid ID - must be a number with at least 5 digits' });
     }
 
-    // Validate birthday
-    const birthdayDate = new Date(birthday);
-    if (isNaN(birthdayDate.getTime())) {
+    // Validate birthday format (YYYY-MM-DD)
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(birthday)) {
+      return res.status(400).json({ error: 'Invalid birth date format. Please use YYYY-MM-DD format' });
+    }
+
+    // Parse the date without timezone
+    const [year, month, day] = birthday.split('-').map(Number);
+    const birthdayDate = new Date(year, month - 1, day);
+    
+    // Validate if it's a valid date
+    if (isNaN(birthdayDate.getTime()) || 
+        birthdayDate.getFullYear() !== year || 
+        birthdayDate.getMonth() !== month - 1 || 
+        birthdayDate.getDate() !== day) {
       return res.status(400).json({ error: 'Invalid birth date' });
     }
 
@@ -50,35 +61,48 @@ router.post('/', async (req, res) => {
       marital_status
     });
     await newUser.save();
-    res.status(201).json(newUser);
+    
+    // Format the response to show birthday in YYYY-MM-DD format
+    const response = newUser.toObject();
+    response.birthday = birthday;
+    res.status(201).json(response);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 });
 
-// Get user details and total cost
+// Get user details
 router.get('/:id', async (req, res) => {
   try {
-    const user = await User.findOne({ id: req.params.id });
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+    // Validate ID format
+    if (!/^\d{5,}$/.test(req.params.id)) {
+      return res.status(400).json({ 
+        error: 'Invalid ID format. The ID must be a number with at least 5 digits.' 
+      });
     }
 
-    const totalCosts = await Cost.aggregate([
-      { $match: { userid: req.params.id } },
-      { $group: { _id: null, total: { $sum: '$sum' } } },
-    ]);
+    const user = await User.findOne({ id: req.params.id });
+    if (!user) {
+      return res.status(404).json({ 
+        error: 'User not found. Please check if the ID is correct.' 
+      });
+    }
 
-    const total = totalCosts.length > 0 ? totalCosts[0].total : 0;
+    // Format birthday to YYYY-MM-DD
+    const birthday = user.birthday.toISOString().split('T')[0];
 
     res.json({
+      id: user.id,
       first_name: user.first_name,
       last_name: user.last_name,
-      id: user.id,
-      total,
+      birthday: birthday,
+      marital_status: user.marital_status
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ 
+      error: 'An internal server error occurred. Please try again later.',
+      details: err.message 
+    });
   }
 });
 
