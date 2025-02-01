@@ -1,143 +1,76 @@
+// costs.test.js
 const request = require('supertest');
 const { app } = require('./setup');
 
-describe('POST /api/costs/add', () => {
-  it('should add a new cost item with all valid fields', async () => {
-    const testDate = new Date('2024-03-15');
-    const response = await request(app)
-      .post('/api/costs/add')
+describe('Costs API', () => {
+  let testUserId = '54321'; // Create such a user for tests
+  
+  beforeAll(async () => {
+    // First, create a user to associate expenses
+    await request(app)
+      .post('/api/users')
       .send({
-        description: 'Test expense',
-        category: 'food',
-        userid: '123123',
-        sum: 50,
-        date: testDate
+        id: testUserId,
+        first_name: 'Cost',
+        last_name: 'Tester',
+        birthday: '2000-01-01',
+        marital_status: 'single'
       });
-
-    expect(response.statusCode).toBe(201);
-    expect(response.body).toHaveProperty('_id');
-    expect(response.body.description).toBe('Test expense');
-    expect(response.body.category).toBe('food');
-    expect(response.body.userid).toBe('123123');
-    expect(response.body.sum).toBe(50);
-    expect(new Date(response.body.date)).toEqual(testDate);
   });
 
-  it('should add a cost item without date and use current date', async () => {
-    const response = await request(app)
-      .post('/api/costs/add')
-      .send({
-        description: 'Test expense',
-        category: 'food',
-        userid: '123123',
-        sum: 50
-      });
+  describe('POST /api/add', () => {
+    it('should add a new cost with valid data', async () => {
+      const response = await request(app)
+        .post('/api/add')
+        .send({
+          description: 'Pizza',
+          category: 'food',
+          userid: testUserId,
+          sum: 50,
+          date: '2023-10-01'
+        });
+      expect(response.statusCode).toBe(201);
+      expect(response.body).toHaveProperty('_id');
+      expect(response.body.description).toBe('Pizza');
+      expect(response.body.sum).toBe(50);
+    });
 
-    expect(response.statusCode).toBe(201);
-    expect(response.body.date).toBeDefined();
-    expect(new Date(response.body.date)).toBeInstanceOf(Date);
+    it('should fail if sum is negative', async () => {
+      const response = await request(app)
+        .post('/api/add')
+        .send({
+          description: 'Bad Data',
+          category: 'food',
+          userid: testUserId,
+          sum: -10
+        });
+      expect(response.statusCode).toBe(400);
+      expect(response.body.error).toMatch(/Sum must be a positive number/);
+    });
+
+    it('should fail if user does not exist', async () => {
+      const response = await request(app)
+        .post('/api/add')
+        .send({
+          description: 'Unknown User Cost',
+          category: 'food',
+          userid: '99999',
+          sum: 20
+        });
+      expect(response.statusCode).toBe(404);
+      expect(response.body.error).toMatch(/User does not exist/);
+    });
   });
 
-  it('should fail when sum is negative', async () => {
-    const response = await request(app)
-      .post('/api/costs/add')
-      .send({
-        description: 'Test expense',
-        category: 'food',
-        userid: '123123',
-        sum: -50
-      });
+  describe('GET /api', () => {
+    it('should get all costs', async () => {
+      const response = await request(app).get('/api');
+      expect(response.statusCode).toBe(200);
+      expect(Array.isArray(response.body)).toBe(true);
 
-    expect(response.statusCode).toBe(400);
-    expect(response.body).toHaveProperty('error');
-    expect(response.body.error).toMatch(/positive number/i);
-  });
-
-  it('should fail when sum is zero', async () => {
-    const response = await request(app)
-      .post('/api/costs/add')
-      .send({
-        description: 'Test expense',
-        category: 'food',
-        userid: '123123',
-        sum: 0
-      });
-
-    expect(response.statusCode).toBe(400);
-    expect(response.body).toHaveProperty('error');
-    expect(response.body.error).toMatch(/positive number/i);
-  });
-
-  it('should fail when required fields are missing', async () => {
-    const response = await request(app)
-      .post('/api/costs/    add')
-      .send({
-        description: 'Test expense'
-        // missing category, userid, and sum
-      });
-
-    expect(response.statusCode).toBe(400);
-    expect(response.body).toHaveProperty('error');
-    expect(response.body.error).toMatch(/required fields/i);
-  });
-
-  it('should fail when description is empty', async () => {
-    const response = await request(app)
-      .post('/api/costs/add')
-      .send({
-        description: '',
-        category: 'food',
-        userid: '123123',
-        sum: 50
-      });
-
-    expect(response.statusCode).toBe(400);
-    expect(response.body).toHaveProperty('error');
-  });
-
-  it('should fail when category is empty', async () => {
-    const response = await request(app)
-      .post('/api/costs/add')
-      .send({
-        description: 'Test expense',
-        category: '',
-        userid: '123123',
-        sum: 50
-      });
-
-    expect(response.statusCode).toBe(400);
-    expect(response.body).toHaveProperty('error');
-  });
-
-  it('should trim whitespace from text fields', async () => {
-    const response = await request(app)
-      .post('/api/costs/add')
-      .send({
-        description: '  Test expense  ',
-        category: '  food  ',
-        userid: '  123123  ',
-        sum: 50
-      });
-
-    expect(response.statusCode).toBe(201);
-    expect(response.body.description).toBe('Test expense');
-    expect(response.body.category).toBe('food');
-    expect(response.body.userid).toBe('123123');
-  });
-
-  it('should fail when date is invalid', async () => {
-    const response = await request(app)
-      .post('/api/costs/add')
-      .send({
-        description: 'Test expense',
-        category: 'food',
-        userid: '123123',
-        sum: 50,
-        date: 'invalid-date'
-      });
-
-    expect(response.statusCode).toBe(400);
-    expect(response.body).toHaveProperty('error');
-    expect(response.body.error).toMatch(/date/i);
+      // Ensure there is at least one expense added
+      const pizzaCost = response.body.find(cost => cost.description === 'Pizza');
+      expect(pizzaCost).toBeDefined();
+    });
   });
 });

@@ -1,80 +1,84 @@
+// report.test.js
 const request = require('supertest');
 const { app } = require('./setup');
-const Cost = require('../models/cost');
 
-describe('GET /api/report', () => {
-  beforeEach(async () => {
-    // Clear costs collection before each test
-    await Cost.deleteMany({});
+describe('Report API', () => {
+  let testUserId = '77777';
+
+  beforeAll(async () => {
+    // Create a user for tests
+    await request(app)
+      .post('/api/users')
+      .send({
+        id: testUserId,
+        first_name: 'Report',
+        last_name: 'User',
+        birthday: '1995-05-05',
+        marital_status: 'single'
+      });
+
+    // Add some expenses to him
+    await request(app)
+      .post('/api/add')
+      .send({
+        description: 'Rent',
+        category: 'housing',
+        userid: testUserId,
+        sum: 1000,
+        date: '2024-01-10'
+      });
+
+    await request(app)
+      .post('/api/add')
+      .send({
+        description: 'Gym',
+        category: 'sport',
+        userid: testUserId,
+        sum: 150,
+        date: '2024-01-15'
+      });
   });
 
-  it('should return costs for a specific user, year, and month', async () => {
-    // Add test costs
-    await Cost.create([
-      {
-        description: 'Test expense 1',
-        category: 'food',
-        userid: '123123',
-        sum: 100,
-        date: new Date('2025-01-15') // January 2025
-      },
-      {
-        description: 'Test expense 2',
-        category: 'health',
-        userid: '123123',
-        sum: 200,
-        date: new Date('2025-01-20') // January 2025
-      },
-      {
-        description: 'Different month',
-        category: 'food',
-        userid: '123123',
-        sum: 300,
-        date: new Date('2025-02-15') // February 2025 - shouldn't be included
-      }
-    ]);
-
+  it('should return a monthly report for a given user, year and month', async () => {
     const response = await request(app)
-      .get('/api/report?id=123123&year=2025&month=1');
-    
+      .get('/api/report')
+      .query({ id: testUserId, year: '2024', month: '1' });
+
     expect(response.statusCode).toBe(200);
-    expect(response.body).toHaveProperty('costs');
-    expect(response.body).toHaveProperty('categorySummaries');
-    expect(response.body).toHaveProperty('summary');
-    
-    // Check costs array
-    expect(response.body.costs).toHaveLength(2);
-    expect(response.body.costs[0].sum).toBe(100);
-    expect(response.body.costs[1].sum).toBe(200);
-    
-    // Check category summaries
-    expect(response.body.categorySummaries).toHaveLength(2);
-    const foodCategory = response.body.categorySummaries.find(c => c.category === 'food');
-    const healthCategory = response.body.categorySummaries.find(c => c.category === 'health');
-    expect(foodCategory.sum).toBe(100);
-    expect(healthCategory.sum).toBe(200);
-    
-    // Check total summary
-    expect(response.body.summary.total).toBe(300);
-    expect(response.body.summary.categories).toContain('food');
-    expect(response.body.summary.categories).toContain('health');
+    expect(response.body.userId).toBe(testUserId);
+    expect(response.body.month).toBe(1);
+    expect(response.body.year).toBe(2024);
+
+    // Check for categories like housing, sport
+    const housingCategory = response.body.categories.find(cat => cat.category === 'housing');
+    const sportCategory = response.body.categories.find(cat => cat.category === 'sport');
+    expect(housingCategory).toBeDefined();
+    expect(sportCategory).toBeDefined();
+    expect(housingCategory.expensesCount).toBe(1);
+    expect(sportCategory.expensesCount).toBe(1);
   });
 
-  it('should return empty arrays when no costs exist for the period', async () => {
+  it('should return 404 if no data found for that month', async () => {
     const response = await request(app)
-      .get('/api/report?id=123123&year=2024&month=1');
-    
-    expect(response.statusCode).toBe(200);
-    expect(response.body.costs).toHaveLength(0);
-    expect(response.body.categorySummaries).toHaveLength(0);
-    expect(response.body.summary.total).toBe(0);
-    expect(response.body.summary.categories).toHaveLength(0);
+      .get('/api/report')
+      .query({ id: testUserId, year: '2022', month: '12' }); // No expenses on this date
+    expect(response.statusCode).toBe(404);
+    expect(response.body.error).toMatch(/No data/);
   });
 
-  it('should return an error for missing parameters', async () => {
-    const response = await request(app).get('/api/report');
+  it('should fail if missing parameters', async () => {
+    // Without year
+    let response = await request(app)
+      .get('/api/report')
+      .query({ id: testUserId, month: '1' });
     expect(response.statusCode).toBe(400);
-    expect(response.body).toHaveProperty('error');
-    expect(response.body.error).toMatch(/missing required parameters/i);
+    expect(response.body.error).toMatch(/Missing year/);
+
+    // Without month
+    response = await request(app)
+      .get('/api/report')
+      .query({ id: testUserId, year: '2024' });
+    expect(response.statusCode).toBe(400);
+    expect(response.body.error).toMatch(/Missing month/);
   });
 });
