@@ -3,6 +3,9 @@ const router = express.Router();
 const Cost = require('../models/cost');
 const User = require('../models/user');
 
+// Get the allowed categories from the Cost model
+const ALLOWED_CATEGORIES = ['food', 'health', 'housing', 'sport', 'education'];
+
 // Monthly report endpoint with grouping by categories
 router.get('/', async (req, res) => {
   const { id, year, month } = req.query;
@@ -49,25 +52,19 @@ router.get('/', async (req, res) => {
         ]
       }
     }).sort('date');
-
-    // Check if there are any costs for the selected month
-    if (costs.length === 0) {
-      return res.status(404).json({ 
-        error: 'No data',
-        message: `No expense data available for ${month}/${year}`
-      });
-    }
     
-    // Group costs by category
+    // Initialize costsByCategory with all possible categories
     const costsByCategory = {};
+    ALLOWED_CATEGORIES.forEach(category => {
+      costsByCategory[category] = {
+        expenses: [],
+        totalSum: 0,
+        count: 0
+      };
+    });
+
+    // Add the actual costs to their respective categories
     costs.forEach(cost => {
-      if (!costsByCategory[cost.category]) {
-        costsByCategory[cost.category] = {
-          expenses: [],
-          totalSum: 0,
-          count: 0
-        };
-      }
       costsByCategory[cost.category].expenses.push({
         description: cost.description,
         sum: cost.sum,
@@ -78,7 +75,9 @@ router.get('/', async (req, res) => {
     });
 
     // Calculate grand total and summary
-    const categoriesCount = Object.keys(costsByCategory).length;
+    const categoriesCount = Object.values(costsByCategory)
+      .filter(category => category.totalSum > 0)
+      .length;
     const totalExpensesCount = Object.values(costsByCategory)
       .reduce((acc, category) => acc + category.count, 0);
     const grandTotal = Object.values(costsByCategory)
