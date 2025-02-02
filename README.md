@@ -28,6 +28,7 @@ A robust RESTful API service for personal expense tracking, built with Node.js, 
 - **Testing**: Jest with Supertest
 - **Documentation**: JSDoc
 - **Code Quality**: ESLint (optional)
+- **Deployment**: Render
 
 ## 📁 Project Structure
 
@@ -47,7 +48,9 @@ expense-tracker/
 │   ├── report.test.js  # Report endpoints tests
 │   └── users.test.js   # User endpoints tests
 ├── app.js              # Application entry point
-└── package.json        # Project configuration
+├── .env                # Environment variables
+├── package.json        # Project configuration
+└── README.md           # Project documentation
 ```
 
 ## 🚦 Getting Started
@@ -74,7 +77,7 @@ expense-tracker/
 3. Configure environment variables:
    Create a `.env` file with:
    ```env
-   MONGO_URI=mongodb://localhost:27017/expense-tracker
+   MONGO_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/expense-tracker?retryWrites=true&w=majority
    PORT=3000
    NODE_ENV=development
    ```
@@ -117,6 +120,22 @@ expense-tracker/
   - Retrieve team member information
   - Returns developers' details
 
+## 🚀 Deployment
+
+The project is deployed on **Render**.
+
+- **Base URL:**
+  ```
+  https://expense-tracker-bs5z.onrender.com
+  ```
+- **Test Endpoints:**
+  ```
+  GET  https://expense-tracker-bs5z.onrender.com/api/about
+  POST https://expense-tracker-bs5z.onrender.com/api/add
+  GET  https://expense-tracker-bs5z.onrender.com/api/report?id=123123&year=2025&month=2
+  GET  https://expense-tracker-bs5z.onrender.com/api/users/123123
+  ```
+
 ## 🧪 Testing
 
 Run the test suite:
@@ -153,3 +172,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 Made with ❤️ by the Expense Tracker Team
+
