@@ -62,7 +62,7 @@ describe('Users API', () => {
       const response = await request(app).get(`/api/users/${testUserId}`);
       expect(response.statusCode).toBe(200);
       expect(response.body.id).toBe(testUserId);
-      expect(response.body).toHaveProperty('total_expenses');
+      expect(response.body).toHaveProperty('total');
     });
 
     /* Test handling of non-existent user request */

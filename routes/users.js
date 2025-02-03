@@ -116,14 +116,14 @@ router.get('/:id', async (req, res) => {
     /* Format birthday to YYYY-MM-DD */
     const birthday = user.birthday.toISOString().split('T')[0];
 
-    /* Send response with user details and total expenses */
+    /* Send response with user details and total */
     res.json({
       id: user.id,
       first_name: user.first_name,
       last_name: user.last_name,
       birthday: birthday,
       marital_status: user.marital_status,
-      total_expenses: totalExpenses.length > 0 ? totalExpenses[0].total : 0
+      total: totalExpenses.length > 0 ? totalExpenses[0].total : 0
     });
   } catch (err) {
     res.status(500).json({ 
