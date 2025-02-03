@@ -80,7 +80,7 @@ router.get('/', async (req, res) => {
       costsByCategory[cost.category].expenses.push({
         description: cost.description,
         sum: cost.sum,
-        date: cost.date.toISOString().split('T')[0]
+        day: cost.date.getDate()
       });
       costsByCategory[cost.category].totalSum += cost.sum;
       costsByCategory[cost.category].count += 1;
