@@ -24,14 +24,14 @@ describe('GET /api/about', () => {
     /* Insert test team members */
     await About.create([
       {
-        id: "123456789",
+        id: "206785867",
         first_name: "Gal",
         last_name: "Touti",
-        birthday: new Date("1990-01-01"),
+        birthday: new Date("1998-10-08"),
         marital_status: "single"
       },
       {
-        id: "987654321",
+        id: "207700923",
         first_name: "Sahar",
         last_name: "Abitbol",
         birthday: new Date("1990-01-01"),
