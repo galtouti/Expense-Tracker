@@ -17,8 +17,7 @@ const costSchema = new mongoose.Schema({
   description: { 
     type: String, 
     required: [true, 'Description is required'],
-    trim: true,
-    minlength: [1, 'Description cannot be empty']
+    trim: true
   },
   /* Category of the expense (must be one of the allowed categories) */
   category: { 
